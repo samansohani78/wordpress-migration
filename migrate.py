@@ -26,7 +26,7 @@ load_dotenv()
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging. INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
         logging.FileHandler('migration.log', encoding='utf-8'),
@@ -38,6 +38,7 @@ logger = logging.getLogger(__name__)
 
 def ensure_url_scheme(url: str) -> str:
     """Ensure URL has a scheme (https://)."""
+    url = url.strip() if url else ''
     if url and not url.startswith(('http://', 'https://')):
         return f'https://{url}'
     return url
@@ -46,12 +47,12 @@ def ensure_url_scheme(url: str) -> str:
 # Configuration
 CONFIG = {
     'WORDPRESS_URL': ensure_url_scheme(os.getenv('WORDPRESS_URL', '')),
-    'WORDPRESS_AUTH_TOKEN': os.getenv('WORDPRESS_AUTH_TOKEN', ''),
+    'WORDPRESS_AUTH_TOKEN': os. getenv('WORDPRESS_AUTH_TOKEN', '').strip(),
     'SOURCE_CMS_URL': ensure_url_scheme(os.getenv('SOURCE_CMS_URL', '')),
-    'EDITOR_API_KEY': os. getenv('EDITOR_API_KEY', ''),
-    'VOTER_API_KEY': os. getenv('VOTER_API_KEY', ''),
-    'INPUT_JSON_PATH': os.getenv('INPUT_JSON_PATH', 'articles.json'),
-    'DEBUG_DIR': os.getenv('DEBUG_DIR', 'debug'),
+    'EDITOR_API_KEY': os.getenv('EDITOR_API_KEY', '').strip(),
+    'VOTER_API_KEY': os.getenv('VOTER_API_KEY', '').strip(),
+    'INPUT_JSON_PATH': os.getenv('INPUT_JSON_PATH', 'articles.json').strip(),
+    'DEBUG_DIR': os.getenv('DEBUG_DIR', 'debug').strip(),
     'MAX_RETRIES': 3,
     'RETRY_BACKOFF': 2,
     'PASS_THRESHOLD': 70,
@@ -59,11 +60,11 @@ CONFIG = {
 }
 
 # AI Models
-EDITOR_MODEL = 'openai/gpt-4.1-nano'
+EDITOR_MODEL = 'openai/gpt-4. 1-nano'
 VOTER_MODELS = [
-    'google/gemma-3-27b-it:free',
+    'google/gemma-3-27b-it: free',
     'xiaomi/mimo-v2-flash:free',
-    'nex-agi/deepseek-v3.1-nex-n1:free',
+    'nex-agi/deepseek-v3. 1-nex-n1:free',
 ]
 
 OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions'
@@ -72,7 +73,7 @@ OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions'
 @dataclass
 class StructureComponent:
     """Represents a component in the HTML structure."""
-    type: str  # 'image', 'heading', 'paragraph', 'list', 'table', 'other'
+    type: str
     position: int
     original_html: str
     text_content: Optional[str] = None
@@ -86,13 +87,13 @@ class StructureTemplate:
     components: List[StructureComponent]
     has_table: bool = False
     image_positions: List[int] = field(default_factory=list)
-    text_positions:  List[int] = field(default_factory=list)
+    text_positions: List[int] = field(default_factory=list)
 
 
 @dataclass
 class AIOutput:
     """Output from the AI editor."""
-    rewritten_content: Dict[int, str]  # position -> rewritten text
+    rewritten_content: Dict[int, str]
     faq_html: str
     table_html: Optional[str]
     meta_description: str
@@ -157,7 +158,7 @@ class HTMLStructureParser:
         for element in soup.children:
             if isinstance(element, NavigableString):
                 text = str(element).strip()
-                if text:
+                if text: 
                     components.append(StructureComponent(
                         type='text',
                         position=position,
@@ -176,14 +177,13 @@ class HTMLStructureParser:
             
             if component.type == 'image':
                 image_positions.append(position)
-            elif component.type in ('heading', 'paragraph', 'list'):
+            elif component. type in ('heading', 'paragraph', 'list'):
                 text_positions.append(position)
-            elif component.type == 'table':
+            elif component.type == 'table': 
                 has_table = True
             
             position += 1
         
-        # Also find nested images
         for img in soup.find_all('img'):
             parent_pos = self._find_parent_position(img, components)
             if parent_pos is not None and parent_pos not in image_positions:
@@ -196,21 +196,19 @@ class HTMLStructureParser:
             text_positions=text_positions
         )
     
-    def _parse_element(self, element: Tag, position: int) -> StructureComponent:
+    def _parse_element(self, element: Tag, position: int) -> StructureComponent: 
         """Parse a single HTML element."""
-        tag_name = element. name. lower()
+        tag_name = element.name.lower()
         
-        # Check for images
         if tag_name == 'img' or element.find('img'):
             return StructureComponent(
                 type='image',
                 position=position,
                 original_html=str(element),
                 tag_name=tag_name,
-                attributes=dict(element.attrs) if hasattr(element, 'attrs') else {}
+                attributes=dict(element. attrs) if hasattr(element, 'attrs') else {}
             )
         
-        # Check for tables
         if tag_name == 'table' or element.find('table'):
             return StructureComponent(
                 type='table',
@@ -220,7 +218,6 @@ class HTMLStructureParser:
                 text_content=element.get_text(strip=True)
             )
         
-        # Check for headings
         if tag_name in {'h1', 'h2', 'h3', 'h4', 'h5', 'h6'}:
             return StructureComponent(
                 type='heading',
@@ -231,7 +228,6 @@ class HTMLStructureParser:
                 attributes=dict(element. attrs) if hasattr(element, 'attrs') else {}
             )
         
-        # Check for paragraphs
         if tag_name == 'p':
             return StructureComponent(
                 type='paragraph',
@@ -242,7 +238,6 @@ class HTMLStructureParser:
                 attributes=dict(element. attrs) if hasattr(element, 'attrs') else {}
             )
         
-        # Check for lists
         if tag_name in self.LIST_TAGS:
             return StructureComponent(
                 type='list',
@@ -250,10 +245,9 @@ class HTMLStructureParser:
                 original_html=str(element),
                 tag_name=tag_name,
                 text_content=element.get_text(strip=True),
-                attributes=dict(element.attrs) if hasattr(element, 'attrs') else {}
+                attributes=dict(element. attrs) if hasattr(element, 'attrs') else {}
             )
         
-        # Other elements (div, span, etc.)
         return StructureComponent(
             type='other',
             position=position,
@@ -291,7 +285,7 @@ class AIEditor:
     def __init__(self, api_key: str):
         self.api_key = api_key
     
-    def create_editor_prompt(self, title: str, text_blocks: List[Dict], 
+    def create_editor_prompt(self, title: str, text_blocks: List[Dict],
                             keyword:  str, needs_table: bool) -> str:
         """Create the prompt for the editor AI."""
         text_content = "\n\n".join([
@@ -344,7 +338,7 @@ class AIEditor:
             'messages': [
                 {'role': 'user', 'content': prompt}
             ],
-            'temperature': 0.7,
+            'temperature':  0.7,
             'max_tokens': 4000,
         }
         
@@ -362,9 +356,8 @@ class AIEditor:
     def parse_editor_response(self, response: str) -> Optional[AIOutput]:
         """Parse the JSON response from the editor."""
         try:
-            # Try to extract JSON from the response
             json_match = re.search(r'\{[\s\S]*\}', response)
-            if json_match: 
+            if json_match:
                 data = json.loads(json_match.group())
             else:
                 data = json.loads(response)
@@ -384,18 +377,16 @@ class AIEditor:
             logger. error(f"Failed to parse editor response: {e}")
             return None
     
-    def rewrite_content(self, title: str, text_blocks: List[Dict], 
+    def rewrite_content(self, title: str, text_blocks: List[Dict],
                        keyword: str, needs_table: bool) -> Optional[AIOutput]:
         """Rewrite content using AI."""
         prompt = self.create_editor_prompt(title, text_blocks, keyword, needs_table)
         
-        # Save prompt for debugging
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         save_debug_file(f'editor_prompt_{timestamp}.txt', prompt)
         
         response = self.call_editor(prompt)
         
-        # Save response for debugging
         save_debug_file(f'editor_response_{timestamp}.txt', response)
         
         return self.parse_editor_response(response)
@@ -464,7 +455,7 @@ class AIVoter:
         )
         response.raise_for_status()
         
-        result = response. json()
+        result = response.json()
         return result['choices'][0]['message']['content']
     
     def parse_voter_response(self, response: str) -> Dict:
@@ -475,11 +466,11 @@ class AIVoter:
                 return json.loads(json_match. group())
             return json.loads(response)
         except (json.JSONDecodeError, TypeError):
-            return {'total_score': 0, 'passed': False, 'suggestions': ['Failed to parse response']}
+            return {'total_score': 0, 'passed': False, 'suggestions':  ['Failed to parse response']}
     
     def grade_content(self, title: str, content: str, meta_description: str) -> Tuple[bool, List[str]]:
         """Grade content using multiple voter models."""
-        prompt = self.create_voter_prompt(title, content, meta_description)
+        prompt = self. create_voter_prompt(title, content, meta_description)
         
         votes = []
         all_suggestions = []
@@ -495,15 +486,14 @@ class AIVoter:
                 votes.append(passed)
                 
                 if result.get('suggestions'):
-                    all_suggestions. extend(result['suggestions'])
+                    all_suggestions.extend(result['suggestions'])
                 
-                logger.info(f"  {model}: Score={score}, Passed={passed}")
+                logger. info(f"  {model}:  Score={score}, Passed={passed}")
                 
             except Exception as e:
                 logger.warning(f"Voter {model} failed: {e}")
                 votes.append(False)
         
-        # Majority vote
         passed_count = sum(votes)
         majority_passed = passed_count > len(votes) / 2
         
@@ -521,19 +511,15 @@ class HTMLReconstructor:
         
         for comp in template.components:
             if comp.position in ai_output.rewritten_content:
-                # Use rewritten content
                 html_parts. append(ai_output.rewritten_content[comp.position])
             else:
-                # Keep original (images, tables, etc.)
                 html_parts.append(comp.original_html)
         
-        # Add table if needed and AI generated one
         if not template.has_table and ai_output.table_html:
             html_parts.append(ai_output.table_html)
         
-        # Add FAQ section at the end
         if ai_output.faq_html:
-            html_parts.append(ai_output.faq_html)
+            html_parts.append(ai_output. faq_html)
         
         return '\n'.join(html_parts)
 
@@ -551,13 +537,11 @@ class ImageProcessor:
         soup = BeautifulSoup(html, 'html.parser')
         urls = set()
         
-        # From HTML
-        for img in soup. find_all('img'):
-            src = img.get('src', '')
+        for img in soup.find_all('img'):
+            src = img. get('src', '')
             if src:
                 urls.add(src)
         
-        # From JSON metadata
         if json_images: 
             urls.update(json_images)
         
@@ -566,15 +550,13 @@ class ImageProcessor:
     @retry_request
     def download_image(self, image_path: str) -> Optional[bytes]:
         """Download image from source CMS."""
-        # Handle relative paths
-        if image_path. startswith('/'):
+        if image_path.startswith('/'):
             url = f"{self.source_cms_url}{image_path}"
         elif not image_path.startswith('http'):
             url = f"{self.source_cms_url}/{image_path}"
         else: 
             url = image_path
         
-        # Handle URL-encoded Persian filenames
         url = unquote(url)
         
         logger.info(f"Downloading image:  {url}")
@@ -592,7 +574,6 @@ class ImageProcessor:
             'Content-Disposition': f'attachment; filename="{filename}"',
         }
         
-        # Determine content type
         ext = filename.lower().split('.')[-1]
         content_types = {
             'jpg': 'image/jpeg',
@@ -620,29 +601,24 @@ class ImageProcessor:
         url_mapping = {}
         featured_image_id = None
         
-        # Prioritize first JSON image as featured
         priority_url = json_images[0] if json_images else None
         
         for url in image_urls:
             try:
-                # Extract filename
                 parsed = urlparse(url)
                 filename = unquote(parsed.path. split('/')[-1])
                 if not filename:
                     filename = f"image_{hashlib.md5(url.encode()).hexdigest()[:8]}.jpg"
                 
-                # Download
                 image_data = self.download_image(url)
                 if not image_data:
                     continue
                 
-                # Upload
                 wp_media = self.upload_to_wordpress(image_data, filename)
                 if wp_media:
                     new_url = wp_media.get('source_url', '')
                     url_mapping[url] = new_url
                     
-                    # Set featured image
                     if url == priority_url or (featured_image_id is None and new_url):
                         featured_image_id = wp_media.get('id')
                     
@@ -651,7 +627,6 @@ class ImageProcessor:
             except Exception as e: 
                 logger.error(f"Failed to process image {url}: {e}")
         
-        # Replace URLs in HTML
         updated_html = html
         for old_url, new_url in url_mapping.items():
             updated_html = updated_html.replace(old_url, new_url)
@@ -743,7 +718,6 @@ class MigrationEngine:
     
     def extract_keyword(self, title: str) -> str:
         """Extract primary keyword from title."""
-        # Simple extraction - first significant phrase
         words = title.split()
         if len(words) >= 2:
             return ' '. join(words[:3])
@@ -759,17 +733,15 @@ class MigrationEngine:
         
         logger.info(f"Processing article: {title} (ID: {article_id})")
         
-        try:
-            # Check for duplicates
+        try: 
             if title and self.wp_client.post_exists(title):
-                logger. info(f"Skipping duplicate: {title}")
+                logger. info(f"Skipping duplicate:  {title}")
                 return MigrationResult(
                     success=False,
                     article_id=article_id,
                     error="Duplicate post"
                 )
             
-            # Get HTML content
             html_body = article.get('htmlBody', {})
             if isinstance(html_body, dict):
                 html = html_body.get('html', '')
@@ -784,16 +756,13 @@ class MigrationEngine:
                     error="No HTML content"
                 )
             
-            # Get image URLs from JSON
             image_data = article.get('image', {})
             json_images = image_data.get('urls', []) if isinstance(image_data, dict) else []
             
-            # Step 1: PARSE - Extract structure template
             logger.info("Parsing HTML structure...")
             template = self.parser.parse(html)
             text_blocks = self.parser.extract_text_for_ai(template)
             
-            # Save structure analysis for debugging
             save_debug_file(
                 f'structure_{article_id}.json',
                 json.dumps({
@@ -810,44 +779,37 @@ class MigrationEngine:
             keyword = self.extract_keyword(title)
             needs_table = not template.has_table
             
-            # Step 2: REWRITE with editor/voter loop
             best_output = None
-            best_score = 0
             
             for iteration in range(CONFIG['MAX_ITERATIONS']):
                 logger.info(f"AI rewriting iteration {iteration + 1}/{CONFIG['MAX_ITERATIONS']}...")
                 
-                # Get AI output
-                ai_output = self. editor.rewrite_content(title, text_blocks, keyword, needs_table)
+                ai_output = self.editor.rewrite_content(title, text_blocks, keyword, needs_table)
                 
                 if not ai_output:
                     logger.error("Failed to get AI output")
                     continue
                 
-                # Reconstruct HTML for voting
                 reconstructed = self.reconstructor.reconstruct(template, ai_output)
                 
-                # Grade content
                 passed, suggestions = self.voter.grade_content(
                     title, reconstructed, ai_output.meta_description
                 )
                 
-                if passed:
+                if passed: 
                     logger.info("Content passed voting!")
                     best_output = ai_output
                     break
                 else:
                     logger.info(f"Content failed voting.  Suggestions: {suggestions[: 3]}")
-                    # Store as best so far
-                    if best_output is None: 
+                    if best_output is None:
                         best_output = ai_output
-                    # Add suggestions to text blocks for next iteration
                     if suggestions and iteration < CONFIG['MAX_ITERATIONS'] - 1:
-                        text_blocks.append({
+                        text_blocks. append({
                             'position': -1,
                             'type': 'suggestions',
-                            'tag': 'feedback',
-                            'content': f"بازخورد ارزیابان: {'; '.join(suggestions[: 5])}"
+                            'tag':  'feedback',
+                            'content': f"بازخورد ارزیابان:  {'; '.join(suggestions[: 5])}"
                         })
             
             if not best_output:
@@ -857,17 +819,14 @@ class MigrationEngine:
                     error="Failed to generate content"
                 )
             
-            # Step 3: RECONSTRUCT
             logger.info("Reconstructing final HTML...")
             final_html = self.reconstructor.reconstruct(template, best_output)
             
-            # Process images
             logger.info("Processing images...")
             final_html, featured_image_id = self.image_processor.process_images(
                 final_html, json_images
             )
             
-            # Create WordPress post
             logger.info("Creating WordPress post...")
             post = self.wp_client.create_post(
                 title=title,
@@ -898,17 +857,13 @@ class MigrationEngine:
         """Run the migration process."""
         logger.info(f"Starting migration from:  {json_path}")
         
-        # Load articles
         with open(json_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
         
-        # Handle different JSON structures
         if isinstance(data, list):
-            # Direct array of articles
             articles = data
             logger.info("Detected JSON structure:  direct array of articles")
         elif isinstance(data, dict):
-            # Nested structure - try common paths
             if 'data' in data and 'article' in data['data']:
                 articles = data['data']['article']
                 logger.info("Detected JSON structure: data. article[]")
@@ -922,7 +877,6 @@ class MigrationEngine:
                 articles = data['article']
                 logger.info("Detected JSON structure: article[]")
             else:
-                # Try to find first list in the dict
                 articles = None
                 for key, value in data.items():
                     if isinstance(value, list):
@@ -942,7 +896,7 @@ class MigrationEngine:
                     logger.error(f"Top-level keys found: {list(data.keys())}")
                     return []
         else:
-            logger. error(f"Unexpected JSON structure: {type(data)}")
+            logger.error(f"Unexpected JSON structure: {type(data)}")
             return []
         
         if not isinstance(articles, list):
@@ -950,7 +904,6 @@ class MigrationEngine:
         
         logger.info(f"Found {len(articles)} articles to migrate")
         
-        # Log first article structure for debugging
         if articles:
             first_article = articles[0]
             logger.info(f"First article keys: {list(first_article. keys()) if isinstance(first_article, dict) else 'N/A'}")
@@ -978,14 +931,12 @@ class MigrationEngine:
             else:
                 failed_count += 1
             
-            # Small delay between articles
             time.sleep(1)
         
-        # Summary
         logger.info(f"\n{'='*50}")
         logger.info("MIGRATION SUMMARY")
         logger.info('='*50)
-        logger.info(f"Total articles:  {len(articles)}")
+        logger.info(f"Total articles: {len(articles)}")
         logger.info(f"Successful:  {success_count}")
         logger.info(f"Failed: {failed_count}")
         logger.info(f"Created post IDs: {post_ids}")
@@ -995,19 +946,17 @@ class MigrationEngine:
 
 def main():
     """Main entry point."""
-    # Validate configuration
     required_vars = [
         'WORDPRESS_URL', 'WORDPRESS_AUTH_TOKEN',
         'EDITOR_API_KEY', 'VOTER_API_KEY'
     ]
     
-    missing = [var for var in required_vars if not CONFIG. get(var)]
+    missing = [var for var in required_vars if not CONFIG.get(var)]
     if missing:
         logger.error(f"Missing required environment variables: {missing}")
         logger.error("Please check your . env file")
         return
     
-    # Log configuration (without sensitive values)
     logger.info(f"WordPress URL: {CONFIG['WORDPRESS_URL']}")
     logger.info(f"Source CMS URL: {CONFIG['SOURCE_CMS_URL']}")
     logger.info(f"Input JSON Path: {CONFIG['INPUT_JSON_PATH']}")
