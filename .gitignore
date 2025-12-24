@@ -1,0 +1,38 @@
+# Environment variables with secrets
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Debug output directory
+debug/
+
+# Log files
+*.log
+
+# IDE settings
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Python package info
+*.egg-info/
+*.egg
+dist/
+build/
+
+# macOS files
+.DS_Store
+.AppleDouble
+.LSOverride
