@@ -1,0 +1,71 @@
+2025-12-24 14:07:22,040 - INFO - WordPress URL: https://wp2.ebidar.net
+2025-12-24 14:07:22,040 - INFO - Source CMS URL: https://cms.ebidar.com
+2025-12-24 14:07:22,040 - INFO - Input JSON Path: testarticles.json
+2025-12-24 14:07:22,040 - INFO - Starting migration from:  testarticles.json
+2025-12-24 14:07:22,040 - INFO - Detected JSON structure: data. article[]
+2025-12-24 14:07:22,040 - INFO - Found 2 articles to migrate
+2025-12-24 14:07:22,040 - INFO - First article keys: ['contentItemId', 'displayText', 'htmlBody', 'image']
+2025-12-24 14:07:22,040 - INFO - First article ID: 4t3fr22wq6a6265zp448c93d4x
+2025-12-24 14:07:22,040 - INFO - First article title: ‫ارز دوsagلتی 1403‬‎
+2025-12-24 14:07:22,040 - INFO - 
+==================================================
+2025-12-24 14:07:22,040 - INFO - Processing article 1/2
+2025-12-24 14:07:22,040 - INFO - ==================================================
+2025-12-24 14:07:22,040 - INFO - Processing article: ‫ارز دوsagلتی 1403‬‎ (ID: 4t3fr22wq6a6265zp448c93d4x)
+2025-12-24 14:07:22,299 - INFO - Parsing HTML structure...
+2025-12-24 14:07:22,307 - INFO - AI rewriting iteration 1/3...
+2025-12-24 14:07:23,037 - WARNING - Request failed (attempt 1/3): 400 Client Error: Bad Request for url: https://openrouter.ai/api/v1/chat/completions
+2025-12-24 14:07:23,037 - INFO - Retrying in 1 seconds...
+2025-12-24 14:07:24,788 - WARNING - Request failed (attempt 2/3): 400 Client Error: Bad Request for url: https://openrouter.ai/api/v1/chat/completions
+2025-12-24 14:07:24,789 - INFO - Retrying in 2 seconds...
+2025-12-24 14:07:27,599 - WARNING - Request failed (attempt 3/3): 400 Client Error: Bad Request for url: https://openrouter.ai/api/v1/chat/completions
+2025-12-24 14:07:27,600 - ERROR - Failed to migrate article 4t3fr22wq6a6265zp448c93d4x:  400 Client Error: Bad Request for url: https://openrouter.ai/api/v1/chat/completions
+Traceback (most recent call last):
+  File "/home/nrazavi/bash-script/migrate-to-post/wordpress-migration/migrate.py", line 787, in migrate_article
+    ai_output = self.editor.rewrite_content(title, text_blocks, keyword, needs_table)
+  File "/home/nrazavi/bash-script/migrate-to-post/wordpress-migration/migrate.py", line 388, in rewrite_content
+    response = self.call_editor(prompt)
+  File "/home/nrazavi/bash-script/migrate-to-post/wordpress-migration/migrate.py", line 139, in wrapper
+    raise last_exception
+  File "/home/nrazavi/bash-script/migrate-to-post/wordpress-migration/migrate.py", line 131, in wrapper
+    return func(*args, **kwargs)
+  File "/home/nrazavi/bash-script/migrate-to-post/wordpress-migration/migrate.py", line 351, in call_editor
+    response.raise_for_status()
+  File "/home/nrazavi/.local/lib/python3.10/site-packages/requests/models.py", line 1026, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 400 Client Error: Bad Request for url: https://openrouter.ai/api/v1/chat/completions
+2025-12-24 14:07:28,602 - INFO - 
+==================================================
+2025-12-24 14:07:28,602 - INFO - Processing article 2/2
+2025-12-24 14:07:28,602 - INFO - ==================================================
+2025-12-24 14:07:28,603 - INFO - Processing article: کامودیتی چیست؟sagکامودیتی محور (ID: 4351vxyzz6y5332ty01vj5jznb)
+2025-12-24 14:07:28,876 - INFO - Parsing HTML structure...
+2025-12-24 14:07:28,892 - INFO - AI rewriting iteration 1/3...
+2025-12-24 14:07:29,684 - WARNING - Request failed (attempt 1/3): 400 Client Error: Bad Request for url: https://openrouter.ai/api/v1/chat/completions
+2025-12-24 14:07:29,685 - INFO - Retrying in 1 seconds...
+2025-12-24 14:07:31,429 - WARNING - Request failed (attempt 2/3): 400 Client Error: Bad Request for url: https://openrouter.ai/api/v1/chat/completions
+2025-12-24 14:07:31,430 - INFO - Retrying in 2 seconds...
+2025-12-24 14:07:34,224 - WARNING - Request failed (attempt 3/3): 400 Client Error: Bad Request for url: https://openrouter.ai/api/v1/chat/completions
+2025-12-24 14:07:34,224 - ERROR - Failed to migrate article 4351vxyzz6y5332ty01vj5jznb:  400 Client Error: Bad Request for url: https://openrouter.ai/api/v1/chat/completions
+Traceback (most recent call last):
+  File "/home/nrazavi/bash-script/migrate-to-post/wordpress-migration/migrate.py", line 787, in migrate_article
+    ai_output = self.editor.rewrite_content(title, text_blocks, keyword, needs_table)
+  File "/home/nrazavi/bash-script/migrate-to-post/wordpress-migration/migrate.py", line 388, in rewrite_content
+    response = self.call_editor(prompt)
+  File "/home/nrazavi/bash-script/migrate-to-post/wordpress-migration/migrate.py", line 139, in wrapper
+    raise last_exception
+  File "/home/nrazavi/bash-script/migrate-to-post/wordpress-migration/migrate.py", line 131, in wrapper
+    return func(*args, **kwargs)
+  File "/home/nrazavi/bash-script/migrate-to-post/wordpress-migration/migrate.py", line 351, in call_editor
+    response.raise_for_status()
+  File "/home/nrazavi/.local/lib/python3.10/site-packages/requests/models.py", line 1026, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 400 Client Error: Bad Request for url: https://openrouter.ai/api/v1/chat/completions
+2025-12-24 14:07:35,225 - INFO - 
+==================================================
+2025-12-24 14:07:35,225 - INFO - MIGRATION SUMMARY
+2025-12-24 14:07:35,225 - INFO - ==================================================
+2025-12-24 14:07:35,226 - INFO - Total articles: 2
+2025-12-24 14:07:35,226 - INFO - Successful:  0
+2025-12-24 14:07:35,226 - INFO - Failed: 2
+2025-12-24 14:07:35,226 - INFO - Created post IDs: []

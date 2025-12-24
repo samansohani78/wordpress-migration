@@ -17,7 +17,6 @@ ENV/
 debug/
 
 # Log files
-*.log
 
 # IDE settings
 .idea/
