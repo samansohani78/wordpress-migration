@@ -61,9 +61,9 @@ CONFIG = {
 # AI Models
 EDITOR_MODEL = 'openai/gpt-4.1-nano'
 VOTER_MODELS = [
-    'google/gemma-3-27b-it: free',
+    'google/gemma-3-27b-it:free',
     'xiaomi/mimo-v2-flash:free',
-    'nex-agi/deepseek-v3. 1-nex-n1:free',
+    'nex-agi/deepseek-v3.1-nex-n1:free',
 ]
 
 OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions'
