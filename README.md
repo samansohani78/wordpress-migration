@@ -61,7 +61,7 @@ WORDPRESS_URL=https://your-wordpress-site.com
 WORDPRESS_AUTH_TOKEN=your_base64_encoded_auth_token
 
 # Source CMS URL
-SOURCE_CMS_URL=https://cms.ebidar.com
+SOURCE_CMS_URL=https://your-source-cms-url.com
 
 # OpenRouter API Keys
 EDITOR_API_KEY=your_editor_api_key
