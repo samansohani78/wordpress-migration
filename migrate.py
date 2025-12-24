@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 WordPress Migration Script with AI Content Rewriting
-Migrates articles from JSON to WordPress while preserving image structure.
+Migrates articles from JSON to WordPress while preserving image structure. 
 """
 
 import json
@@ -26,7 +26,7 @@ load_dotenv()
 
 # Configure logging
 logging.basicConfig(
-    level=logging. INFO,
+    level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
         logging.FileHandler('migration.log', encoding='utf-8'),
@@ -35,13 +35,21 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
+def ensure_url_scheme(url: str) -> str:
+    """Ensure URL has a scheme (https://)."""
+    if url and not url.startswith(('http://', 'https://')):
+        return f'https://{url}'
+    return url
+
+
 # Configuration
 CONFIG = {
-    'WORDPRESS_URL': os.getenv('WORDPRESS_URL', ''),
+    'WORDPRESS_URL': ensure_url_scheme(os.getenv('WORDPRESS_URL', '')),
     'WORDPRESS_AUTH_TOKEN': os.getenv('WORDPRESS_AUTH_TOKEN', ''),
-    'SOURCE_CMS_URL': os.getenv('SOURCE_CMS_URL', 'https://cms.ebidar.com'),
-    'EDITOR_API_KEY': os.getenv('EDITOR_API_KEY', ''),
-    'VOTER_API_KEY': os.getenv('VOTER_API_KEY', ''),
+    'SOURCE_CMS_URL': ensure_url_scheme(os.getenv('SOURCE_CMS_URL', '')),
+    'EDITOR_API_KEY': os. getenv('EDITOR_API_KEY', ''),
+    'VOTER_API_KEY': os. getenv('VOTER_API_KEY', ''),
     'INPUT_JSON_PATH': os.getenv('INPUT_JSON_PATH', 'articles.json'),
     'DEBUG_DIR': os.getenv('DEBUG_DIR', 'debug'),
     'MAX_RETRIES': 3,
@@ -53,9 +61,9 @@ CONFIG = {
 # AI Models
 EDITOR_MODEL = 'openai/gpt-4.1-nano'
 VOTER_MODELS = [
-    'google/gemma-3-27b-it:free',
+    'google/gemma-3-27b-it: free',
     'xiaomi/mimo-v2-flash:free',
-    'nex-agi/deepseek-v3.1-nex-n1:free',
+    'nex-agi/deepseek-v3. 1-nex-n1:free',
 ]
 
 OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions'
@@ -78,7 +86,7 @@ class StructureTemplate:
     components: List[StructureComponent]
     has_table: bool = False
     image_positions: List[int] = field(default_factory=list)
-    text_positions: List[int] = field(default_factory=list)
+    text_positions:  List[int] = field(default_factory=list)
 
 
 @dataclass
@@ -149,7 +157,7 @@ class HTMLStructureParser:
         for element in soup.children:
             if isinstance(element, NavigableString):
                 text = str(element).strip()
-                if text: 
+                if text:
                     components.append(StructureComponent(
                         type='text',
                         position=position,
@@ -166,7 +174,7 @@ class HTMLStructureParser:
             component = self._parse_element(element, position)
             components.append(component)
             
-            if component.type == 'image': 
+            if component.type == 'image':
                 image_positions.append(position)
             elif component.type in ('heading', 'paragraph', 'list'):
                 text_positions.append(position)
@@ -190,7 +198,7 @@ class HTMLStructureParser:
     
     def _parse_element(self, element: Tag, position: int) -> StructureComponent:
         """Parse a single HTML element."""
-        tag_name = element.name.lower()
+        tag_name = element. name. lower()
         
         # Check for images
         if tag_name == 'img' or element.find('img'):
@@ -284,7 +292,7 @@ class AIEditor:
         self.api_key = api_key
     
     def create_editor_prompt(self, title: str, text_blocks: List[Dict], 
-                            keyword: str, needs_table: bool) -> str:
+                            keyword:  str, needs_table: bool) -> str:
         """Create the prompt for the editor AI."""
         text_content = "\n\n".join([
             f"[{block['type']. upper()} - Position {block['position']}]\n{block['content']}"
@@ -359,7 +367,7 @@ class AIEditor:
             if json_match: 
                 data = json.loads(json_match.group())
             else:
-                data = json. loads(response)
+                data = json.loads(response)
             
             rewritten_content = {}
             for block in data. get('rewritten_blocks', []):
@@ -420,7 +428,7 @@ class AIVoter:
 {{
     "scores": {{
         "writing_quality": 0-20,
-        "structure":  0-20,
+        "structure": 0-20,
         "seo": 0-20,
         "compliance": 0-20,
         "completeness": 0-20
@@ -456,7 +464,7 @@ class AIVoter:
         )
         response.raise_for_status()
         
-        result = response.json()
+        result = response. json()
         return result['choices'][0]['message']['content']
     
     def parse_voter_response(self, response: str) -> Dict:
@@ -487,9 +495,9 @@ class AIVoter:
                 votes.append(passed)
                 
                 if result.get('suggestions'):
-                    all_suggestions.extend(result['suggestions'])
+                    all_suggestions. extend(result['suggestions'])
                 
-                logger.info(f"  {model}:  Score={score}, Passed={passed}")
+                logger.info(f"  {model}: Score={score}, Passed={passed}")
                 
             except Exception as e:
                 logger.warning(f"Voter {model} failed: {e}")
@@ -535,7 +543,7 @@ class ImageProcessor:
     
     def __init__(self, source_cms_url: str, wp_url: str, wp_auth_token: str):
         self.source_cms_url = source_cms_url. rstrip('/')
-        self.wp_url = wp_url.rstrip('/')
+        self.wp_url = wp_url. rstrip('/')
         self.wp_auth_token = wp_auth_token
     
     def extract_image_urls(self, html: str, json_images: List[str] = None) -> List[str]:
@@ -631,7 +639,7 @@ class ImageProcessor:
                 # Upload
                 wp_media = self.upload_to_wordpress(image_data, filename)
                 if wp_media:
-                    new_url = wp_media. get('source_url', '')
+                    new_url = wp_media.get('source_url', '')
                     url_mapping[url] = new_url
                     
                     # Set featured image
@@ -661,6 +669,10 @@ class WordPressClient:
     @retry_request
     def post_exists(self, title: str) -> bool:
         """Check if a post with the same title already exists."""
+        if not title:
+            logger.warning("Empty title provided for duplicate check")
+            return False
+        
         headers = {
             'Authorization': f'Basic {self.auth_token}',
         }
@@ -734,7 +746,7 @@ class MigrationEngine:
         # Simple extraction - first significant phrase
         words = title.split()
         if len(words) >= 2:
-            return ' '.join(words[: 3])
+            return ' '. join(words[:3])
         return title
     
     def migrate_article(self, article:  Dict) -> MigrationResult:
@@ -742,12 +754,15 @@ class MigrationEngine:
         article_id = article. get('contentItemId', 'unknown')
         title = article.get('displayText', '')
         
+        if not title:
+            logger.warning(f"Article {article_id} has no title (displayText field missing or empty)")
+        
         logger.info(f"Processing article: {title} (ID: {article_id})")
         
         try:
             # Check for duplicates
-            if self.wp_client.post_exists(title):
-                logger.info(f"Skipping duplicate: {title}")
+            if title and self.wp_client.post_exists(title):
+                logger. info(f"Skipping duplicate: {title}")
                 return MigrationResult(
                     success=False,
                     article_id=article_id,
@@ -762,6 +777,7 @@ class MigrationEngine:
                 html = str(html_body)
             
             if not html:
+                logger.warning(f"Article {article_id} has no HTML content")
                 return MigrationResult(
                     success=False,
                     article_id=article_id,
@@ -802,7 +818,7 @@ class MigrationEngine:
                 logger.info(f"AI rewriting iteration {iteration + 1}/{CONFIG['MAX_ITERATIONS']}...")
                 
                 # Get AI output
-                ai_output = self.editor.rewrite_content(title, text_blocks, keyword, needs_table)
+                ai_output = self. editor.rewrite_content(title, text_blocks, keyword, needs_table)
                 
                 if not ai_output:
                     logger.error("Failed to get AI output")
@@ -821,7 +837,7 @@ class MigrationEngine:
                     best_output = ai_output
                     break
                 else:
-                    logger.info(f"Content failed voting. Suggestions: {suggestions[: 3]}")
+                    logger.info(f"Content failed voting.  Suggestions: {suggestions[: 3]}")
                     # Store as best so far
                     if best_output is None: 
                         best_output = ai_output
@@ -830,7 +846,7 @@ class MigrationEngine:
                         text_blocks.append({
                             'position': -1,
                             'type': 'suggestions',
-                            'tag':  'feedback',
+                            'tag': 'feedback',
                             'content': f"بازخورد ارزیابان: {'; '.join(suggestions[: 5])}"
                         })
             
@@ -871,7 +887,7 @@ class MigrationEngine:
             )
             
         except Exception as e:
-            logger.error(f"Failed to migrate article {article_id}: {e}", exc_info=True)
+            logger.error(f"Failed to migrate article {article_id}:  {e}", exc_info=True)
             return MigrationResult(
                 success=False,
                 article_id=article_id,
@@ -884,12 +900,63 @@ class MigrationEngine:
         
         # Load articles
         with open(json_path, 'r', encoding='utf-8') as f:
-            articles = json.load(f)
+            data = json.load(f)
+        
+        # Handle different JSON structures
+        if isinstance(data, list):
+            # Direct array of articles
+            articles = data
+            logger.info("Detected JSON structure:  direct array of articles")
+        elif isinstance(data, dict):
+            # Nested structure - try common paths
+            if 'data' in data and 'article' in data['data']:
+                articles = data['data']['article']
+                logger.info("Detected JSON structure: data. article[]")
+            elif 'data' in data and isinstance(data['data'], list):
+                articles = data['data']
+                logger.info("Detected JSON structure: data[]")
+            elif 'articles' in data: 
+                articles = data['articles']
+                logger.info("Detected JSON structure: articles[]")
+            elif 'article' in data:
+                articles = data['article']
+                logger.info("Detected JSON structure: article[]")
+            else:
+                # Try to find first list in the dict
+                articles = None
+                for key, value in data.items():
+                    if isinstance(value, list):
+                        articles = value
+                        logger.info(f"Detected JSON structure: {key}[]")
+                        break
+                    elif isinstance(value, dict):
+                        for sub_key, sub_value in value.items():
+                            if isinstance(sub_value, list):
+                                articles = sub_value
+                                logger.info(f"Detected JSON structure: {key}.{sub_key}[]")
+                                break
+                        if articles:
+                            break
+                if articles is None:
+                    logger.error("Could not find articles array in JSON structure")
+                    logger.error(f"Top-level keys found: {list(data.keys())}")
+                    return []
+        else:
+            logger. error(f"Unexpected JSON structure: {type(data)}")
+            return []
         
         if not isinstance(articles, list):
             articles = [articles]
         
         logger.info(f"Found {len(articles)} articles to migrate")
+        
+        # Log first article structure for debugging
+        if articles:
+            first_article = articles[0]
+            logger.info(f"First article keys: {list(first_article. keys()) if isinstance(first_article, dict) else 'N/A'}")
+            if isinstance(first_article, dict):
+                logger.info(f"First article ID: {first_article.get('contentItemId', 'N/A')}")
+                logger.info(f"First article title: {first_article.get('displayText', 'N/A')}")
         
         results = []
         success_count = 0
@@ -919,7 +986,7 @@ class MigrationEngine:
         logger.info("MIGRATION SUMMARY")
         logger.info('='*50)
         logger.info(f"Total articles:  {len(articles)}")
-        logger.info(f"Successful: {success_count}")
+        logger.info(f"Successful:  {success_count}")
         logger.info(f"Failed: {failed_count}")
         logger.info(f"Created post IDs: {post_ids}")
         
@@ -937,8 +1004,13 @@ def main():
     missing = [var for var in required_vars if not CONFIG. get(var)]
     if missing:
         logger.error(f"Missing required environment variables: {missing}")
-        logger.error("Please check your .env file")
+        logger.error("Please check your . env file")
         return
+    
+    # Log configuration (without sensitive values)
+    logger.info(f"WordPress URL: {CONFIG['WORDPRESS_URL']}")
+    logger.info(f"Source CMS URL: {CONFIG['SOURCE_CMS_URL']}")
+    logger.info(f"Input JSON Path: {CONFIG['INPUT_JSON_PATH']}")
     
     json_path = CONFIG['INPUT_JSON_PATH']
     if not os.path.exists(json_path):
